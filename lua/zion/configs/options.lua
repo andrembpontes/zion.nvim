@@ -6,12 +6,12 @@
 -- opt.undodir
 
 -- [[ Context ]]
-vim.opt.colorcolumn = "80"    -- str:  Show col for max line length
-vim.opt.number = true         -- bool: Show line numbers
-vim.opt.relativenumber = true -- bool: Show relative line numbers
-vim.opt.scrolloff = 8         -- int:  Min num lines of context
-vim.opt.signcolumn = "yes"    -- str:  Show the sign column
-vim.opt.showtabline = 2       -- int: 0: Never, 1: Auto, 2: Always
+vim.opt.colorcolumn = "80,120" -- str:  Show col for max line length
+vim.opt.number = true          -- bool: Show line numbers
+vim.opt.relativenumber = true  -- bool: Show relative line numbers
+vim.opt.scrolloff = 8          -- int:  Min num lines of context
+vim.opt.signcolumn = "yes"     -- str:  Show the sign column
+vim.opt.showtabline = 2        -- int: 0: Never, 1: Auto, 2: Always
 
 -- [[ Filetypes ]]
 vim.opt.encoding = "utf8"     -- str:  String encoding to use
@@ -37,8 +37,9 @@ vim.opt.list = true
 vim.opt.conceallevel = 2
 vim.opt.concealcursor = ""
 vim.opt.showbreak = "+++"
-vim.opt.linebreak = true
+vim.opt.linebreak = true   -- bool: wrap lines on breatat chars
 vim.opt.wrap = true
+vim.opt.breakindent = true -- bool: honour indentation when wrapping
 
 -- [[ Search ]]
 vim.opt.ignorecase = true -- bool: Ignore case in search patterns
@@ -60,4 +61,5 @@ vim.opt.splitbelow = true -- bool: Place new window below the current one
 vim.opt.spelllang = "en"
 
 vim.opt.mouse = "nvc"
-vim.opt.updatetime = 250
+vim.opt.updatecount = 200 -- number: char count threshold to flush swap file
+vim.opt.updatetime = 2000 -- millis: debounce to flush swap file, used to trigger CursorHold
