@@ -2,11 +2,18 @@ local M = {}
 
 function M.setup(_opts)
     local function _load_all()
+        -- load zion configs
         M.load("zion.configs.autocmds")
         M.load("zion.configs.coding")
         M.load("zion.configs.globals")
         M.load("zion.configs.neovide")
         M.load("zion.configs.winbar")
+
+        -- load user configs
+        local maybe_user_configs = M.load("configs")
+        if (maybe_user_configs ~= nil) then
+            pcall(maybe_user_configs.setup);
+        end
     end
 
     if true or vim.fn.argc(-1) == 0 then
@@ -15,19 +22,19 @@ function M.setup(_opts)
             group = vim.api.nvim_create_augroup("LazyVim", { clear = true }),
             pattern = "VeryLazy",
             callback = function()
-                M.load("configs")
+                _load_all()
             end,
         })
     else
         -- load them now so they affect the opened buffers
-        M.load("configs")
+        _load_all()
     end
 end
 
 function M.load(name)
     local ok, result_or_error = pcall(require, name)
     if ok then
-        --print(name .. " successfully loaded")
+        print(name .. " successfully loaded")
         return result_or_error;
     else
         print("Error loading: " .. name)
@@ -45,7 +52,7 @@ function M.init(_opts)
         -- after installing missing plugins
         M.load("zion.configs.options")
 
-        local maybe_user_configs = M.load("zion.configs")
+        local maybe_user_configs = M.load("configs")
         if (maybe_user_configs ~= nil) then
             pcall(maybe_user_configs.init);
         end
