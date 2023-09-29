@@ -1,19 +1,17 @@
-return {
-	{
-		"neovim/nvim-lspconfig",
-		opts = {
-			servers = {
-				["terraformls"] = function()
-					local util = require("lspconfig").util
-					return {
-						filetypes = { "terraform", "hcl" },
+print('TerraformLS set')
 
-						root_dir = util.root_pattern(".git")
-							or util.root_pattern(".terraform")
-							or vim.loop.os_homedir(),
-					}
-				end,
-			},
-		},
-	},
+return {
+    {
+        "neovim/nvim-lspconfig",
+        opts = {
+            servers = {
+                ["terraformls"] = function(_, opts)
+                    local util = require("lspconfig").util
+                    return {
+                        filetypes = { "terraform", "hcl", "terraform-vars" },
+                    }
+                end,
+            },
+        },
+    },
 }

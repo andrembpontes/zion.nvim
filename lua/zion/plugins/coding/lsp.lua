@@ -1,149 +1,181 @@
 return {
-	{
-		"neovim/nvim-lspconfig",
-		lazy = false,
-		event = { "BufReadPre", "BufNewFile" },
-		dependencies = {
-			-- LS manager
-			"williamboman/mason.nvim",
-			"williamboman/mason-lspconfig.nvim",
-			{ import = "zion.plugins.coding.by-language" },
-		},
+    {
+        "neovim/nvim-lspconfig",
+        lazy = false,
+        event = { "BufReadPre", "BufNewFile" },
+        dependencies = {
+            -- LS manager
+            "williamboman/mason.nvim",
+            "williamboman/mason-lspconfig.nvim",
+            { import = "zion.plugins.coding.by-language" },
+        },
 
-		opts = {
-			-- LSP server options
-			-- setup: fn(server, opts) => bool - True if Mason should auto setup it
-			-- opts: fn(server, opts) => opts - Options to setup server
+        opts = {
+            -- LSP server options
+            -- setup: fn(server, opts) => bool - True if Mason should auto setup it
+            -- opts: fn(server, opts) => opts - Options to setup server
 
-			servers = {
-				["*"] = function()
-					local util = require("lspconfig").util
-					local capabilities =
-						require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
+            servers = {
+                ["*"] = function(_, opts, utils)
+                    local util = require("lspconfig").util
+                    local capabilities =
+                        require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
 
-					return {
-						capabilities = vim.deepcopy(capabilities),
+                    function build_root_dir(finder)
+                        return function(fname)
+                            local root =
+                                -- .lsp_root takes precedence over everything else
+                                util.root_pattern(".lsp_root")(fname)
 
-						root_dir = util.root_pattern(".lsp_root") or util.root_pattern(".git") or vim.loop.os_homedir(),
-					}
-				end,
-			},
+                                -- then we ask the finder, if exists
+                                or finder and finder(fname)
 
-			install = {
-				["*"] = function()
-					return true
-				end,
-			},
+                                -- otherwise we look for safe common defaults
+                                or util.root_pattern(".git")(fname)
+                                or vim.loop.os_homedir()
 
-			setup = {
-				["*"] = function()
-					return true
-				end,
-			},
-		},
+                            if root then
+                                print('[LSP] root_dir = ' .. root)
+                            else
+                                print('[LSP] root_dir not found for: ' .. fname)
+                            end
 
-		config = function(_, opts)
-			pcall(require, "neoconf") --if NeoConf, then ensure it is loaded first
-			pcall(require, "neodev") --if NeoDev, then ensure it is loaded first
+                            return root
+                        end
+                    end
 
-			require("mason") --ensure mason is loaded first
-			local mason_lspconfig = require("mason-lspconfig")
-			local server_opts_cache = {}
+                    return {
+                        capabilities = vim.deepcopy(capabilities),
+                        build_root_dir = build_root_dir,
+                        root_dir = build_root_dir(opts.root_dir),
+                    }
+                end,
+            },
 
-			--vim.lsp.set_log_level("info")
-			--vim.lsp.set_log_level("debug")
+            install = {
+                ["*"] = function()
+                    return true
+                end,
+            },
 
-			--print(vim.inspect(opts))
+            setup = {
+                ["*"] = function()
+                    return true
+                end,
+            },
+        },
 
-			local function eval_server_opts(server_opts, name, base_opts)
-				if type(server_opts) == "function" then
-					return server_opts(name, base_opts or {})
-				end
+        config = function(_, opts)
+            pcall(require, "neoconf") --if NeoConf, then ensure it is loaded first
+            pcall(require, "neodev")  --if NeoDev, then ensure it is loaded first
 
-				return vim.tbl_deep_extend("force", base_opts or {}, server_opts or {})
-			end
+            require("mason")          --ensure mason is loaded first
+            local mason_lspconfig = require("mason-lspconfig")
+            local server_opts_cache = {}
 
-			local function get_server_opts(name)
-				if server_opts_cache[name] then
-					return server_opts_cache[name]
-				end
+            --vim.lsp.set_log_level("info")
+            --vim.lsp.set_log_level("debug")
 
-				local fallback_opts = eval_server_opts(opts.servers["*"], name)
-				server_opts_cache[name] = eval_server_opts(opts.servers[name], name, fallback_opts)
-				return server_opts_cache[name]
-			end
+            --print(vim.inspect(opts))
 
-			local function setup_server(name)
-				local server_opts = get_server_opts(name)
+            local function eval_server_opts(server_opts, name, base_opts)
+                if type(server_opts) == "function" then
+                    return server_opts(name, base_opts or {})
+                end
 
-				if opts.setup[name] then
-					if not opts.setup[name](name, server_opts) then
-						-- setup returned false, skip setup
-						return
-					end
-				else
-					if not opts.setup["*"](name, server_opts) then
-						-- setup returned false, skip setup
-						return
-					end
-				end
+                return vim.tbl_deep_extend("force", base_opts or {}, server_opts or {})
+            end
 
-				require("lspconfig")[name].setup(server_opts)
-			end
+            local function get_server_opts(name)
+                if server_opts_cache[name] then
+                    return server_opts_cache[name]
+                end
 
-			-- get all the servers that are available thourgh mason-lspconfig
-			local available_servers = vim.tbl_keys(require("mason-lspconfig.mappings.server").lspconfig_to_package)
+                local lspconfig_exists, base_lspconfig = 
+                    pcall(require, "lspconfig.server_configurations." .. name)
 
-			local to_install = {} ---@type string[]
-			for key, value in pairs(opts.servers) do
-				local server_opts = get_server_opts(key) or {}
+                if not lspconfig_exists then
+                    base_lspconfig = {}
+                end
 
-				-- skip
-				if key ~= "*" and server_opts then
-					-- run manual setup if mason=false or if this is a server that cannot be installed with mason-lspconfig
-					local install_fn = opts.install[key] or opts.install["*"]
+                local fallback_opts = eval_server_opts(opts.servers["*"], name, lspconfig, base_lspconfig)
+                local specific_opts = eval_server_opts(opts.servers[name], name, fallback_opts)
+                server_opts_cache[name] = vim.tbl_deep_extend('force', fallback_opts, specific_opts)
 
-					if install_fn(key, server_opts) and vim.tbl_contains(available_servers, key) then
-						-- add into to_install
-						-- setup is called by mason setup_handlers
-						to_install[#to_install + 1] = key
-					else
-						-- not available or optted-out
-						-- call setup directly
-						setup_server(key)
-					end
-				end
-			end
+                return server_opts_cache[name]
+            end
 
-			mason_lspconfig.setup({ ensure_installed = to_install })
-			mason_lspconfig.setup_handlers({ setup_server })
-		end,
-	},
+            local function setup_server(name)
+                local server_opts = get_server_opts(name)
 
-	{
-		"jose-elias-alvarez/null-ls.nvim",
-		event = { "BufReadPre", "BufNewFile" },
-		opts = function()
-			local nls = require("null-ls")
-			return {
-				root_dir = require("null-ls.utils").root_pattern(".null-ls-root", ".neoconf.json", "Makefile", ".git"),
+                if opts.setup[name] then
+                    if not opts.setup[name](name, server_opts) then
+                        -- setup returned false, skip setup
+                        return
+                    end
+                else
+                    if not opts.setup["*"](name, server_opts) then
+                        -- setup returned false, skip setup
+                        return
+                    end
+                end
 
-				sources = {
-					nls.builtins.formatting.fish_indent,
-					nls.builtins.diagnostics.fish,
-					nls.builtins.formatting.stylua,
-					nls.builtins.formatting.shfmt,
-					-- nls.builtins.diagnostics.flake8,
-					-- nls.builtins.diagnostics.eslint_d,
-				},
-			}
-		end,
-	},
+                require("lspconfig")[name].setup(server_opts)
+            end
 
-	-- LSP hover signature
-	{
-		"ray-x/lsp_signature.nvim",
-		event = "LspAttach", -- useless before having LSP attached
-		opts = {},
-	},
+            -- get all the servers that are available thourgh mason-lspconfig
+            local available_servers = vim.tbl_keys(require("mason-lspconfig.mappings.server").lspconfig_to_package)
+
+            local to_install = {} ---@type string[]
+            for key, value in pairs(opts.servers) do
+                local server_opts = get_server_opts(key) or {}
+
+                -- skip
+                if key ~= "*" and server_opts then
+                    -- run manual setup if mason=false or if this is a server that cannot be installed with mason-lspconfig
+                    local install_fn = opts.install[key] or opts.install["*"]
+
+                    if install_fn(key, server_opts) and vim.tbl_contains(available_servers, key) then
+                        -- add into to_install
+                        -- setup is called by mason setup_handlers
+                        to_install[#to_install + 1] = key
+                    else
+                        -- not available or optted-out
+                        -- call setup directly
+                        setup_server(key)
+                    end
+                end
+            end
+
+            mason_lspconfig.setup({ ensure_installed = to_install })
+            mason_lspconfig.setup_handlers({ setup_server })
+        end,
+    },
+
+    {
+        "jose-elias-alvarez/null-ls.nvim",
+        event = { "BufReadPre", "BufNewFile" },
+        opts = function()
+            local nls = require("null-ls")
+            return {
+                root_dir = require("null-ls.utils").root_pattern(".null-ls-root", ".neoconf.json", "Makefile", ".git"),
+
+                sources = {
+                    nls.builtins.formatting.fish_indent,
+                    nls.builtins.diagnostics.fish,
+                    nls.builtins.formatting.stylua,
+                    nls.builtins.formatting.shfmt,
+                    -- nls.builtins.diagnostics.flake8,
+                    -- nls.builtins.diagnostics.eslint_d,
+                },
+            }
+        end,
+    },
+
+    -- LSP hover signature
+    {
+        "ray-x/lsp_signature.nvim",
+        event = "LspAttach", -- useless before having LSP attached
+        opts = {},
+    },
 }
