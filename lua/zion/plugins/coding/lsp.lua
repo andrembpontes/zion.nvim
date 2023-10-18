@@ -24,7 +24,7 @@ return {
                     function build_root_dir(finder)
                         return function(fname)
                             local root =
-                                -- .lsp_root takes precedence over everything else
+                            -- .lsp_root takes precedence over everything else
                                 util.root_pattern(".lsp_root")(fname)
 
                                 -- then we ask the finder, if exists
@@ -34,9 +34,7 @@ return {
                                 or util.root_pattern(".git")(fname)
                                 or vim.loop.os_homedir()
 
-                            if root then
-                                print('[LSP] root_dir = ' .. root)
-                            else
+                            if not root then
                                 print('[LSP] root_dir not found for: ' .. fname)
                             end
 
@@ -91,7 +89,7 @@ return {
                     return server_opts_cache[name]
                 end
 
-                local lspconfig_exists, base_lspconfig = 
+                local lspconfig_exists, base_lspconfig =
                     pcall(require, "lspconfig.server_configurations." .. name)
 
                 if not lspconfig_exists then

@@ -11,11 +11,12 @@ return {
             "onsails/lspkind.nvim",
 
             -- Sources
-            "hrsh7th/cmp-buffer",         -- source from buffer words
-            "hrsh7th/cmp-nvim-lsp",       -- source from LSP
-            "saadparwaiz1/cmp_luasnip",   -- LuaSnip
+            "hrsh7th/cmp-buffer",                  -- source from buffer words
+            "hrsh7th/cmp-nvim-lsp",                -- source from LSP
+            "saadparwaiz1/cmp_luasnip",            -- LuaSnip
             "hrsh7th/cmp-nvim-lsp-signature-help", -- LSP Signature help
-            "FelipeLema/cmp-async-path",  -- file path
+            "FelipeLema/cmp-async-path",           -- file path
+            "ray-x/cmp-treesitter",                -- source from TreeSitter
         },
 
         opts = function()
@@ -40,6 +41,7 @@ return {
                         menu = {
                             buffer = "[Buff]",
                             nvim_lsp = "[LSP]",
+                            treesitter = "[Tree]",
                             luasnip = "[LSnip]",
                             nvim_lua = "[Lua]",
                             latex_symbols = "[LaTeX]",
@@ -115,6 +117,8 @@ return {
 
                 sources = cmp.config.sources({
                     { name = "nvim_lsp" },
+                    { name = "treesitter" },
+
                     -- { name = "vsnip" }, -- For vsnip users.
                     { name = "luasnip" }, -- For luasnip users.
                     -- { name = 'ultisnips' }, -- For ultisnips users.
