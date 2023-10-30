@@ -1,9 +1,12 @@
 return {
     {
         "andrembpontes/project.nvim",
+
         -- TODO replace with original repo once PR gets merged
         -- https://github.com/ahmedkhalf/project.nvim/pull/136
         --"ahmedkhalf/project.nvim",
+
+        dir = '~/development/project.nvim',
         opts = {
             detection_methods = { "lsp", "pattern" },
             patterns = { ".git" },
