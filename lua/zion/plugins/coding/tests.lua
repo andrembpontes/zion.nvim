@@ -7,6 +7,7 @@ return {
 			"nvim-treesitter/nvim-treesitter",
 			"antoinemadec/FixCursorHold.nvim",
 			"jfpedroza/neotest-elixir",
+			"nvim-neotest/nvim-nio",
 		},
 		opts = function(_, opts)
 			local patch = {
