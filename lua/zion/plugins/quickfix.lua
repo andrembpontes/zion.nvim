@@ -4,7 +4,7 @@ return {
         dependencies = {
             {
                 'junegunn/fzf',
-                run = function()
+                build = function()
                     vim.fn['fzf#install']()
                 end
             }

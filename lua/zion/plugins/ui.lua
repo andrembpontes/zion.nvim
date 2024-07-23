@@ -111,16 +111,16 @@ return {
 
             wilder.set_option('pipeline', {
                 wilder.branch(
-                    wilder.python_file_finder_pipeline({
-                        -- to use ripgrep : {'rg', '--files'}
-                        -- to use fd      : {'fd', '-tf'}
-                        file_command = { 'find', '.', '-type', 'f', '-printf', '%P\n' },
-                        -- to use fd      : {'fd', '-td'}
-                        dir_command = { 'find', '.', '-type', 'd', '-printf', '%P\n' },
-                        -- use {'cpsm_filter'} for performance, requires cpsm vim plugin
-                        -- found at https://github.com/nixprime/cpsm
-                        filters = { 'fuzzy_filter', 'difflib_sorter' },
-                    }),
+                    -- wilder.python_file_finder_pipeline({
+                    --     -- to use ripgrep : {'rg', '--files'}
+                    --     -- to use fd      : {'fd', '-tf'}
+                    --     file_command = { 'find', '.', '-type', 'f', '-printf', '%P\n' },
+                    --     -- to use fd      : {'fd', '-td'}
+                    --     dir_command = { 'find', '.', '-type', 'd', '-printf', '%P\n' },
+                    --     -- use {'cpsm_filter'} for performance, requires cpsm vim plugin
+                    --     -- found at https://github.com/nixprime/cpsm
+                    --     filters = { 'fuzzy_filter', 'difflib_sorter' },
+                    -- }),
                     wilder.cmdline_pipeline({
                         -- sets the language to use, 'vim' and 'python' are supported
                         language = 'python',
@@ -198,7 +198,7 @@ return {
     {
         event = "VeryLazy",
         "nikvdp/neomux",
-        requires = {
+        dependencies = {
             "mhinz/neovim-remote",
         },
     },
