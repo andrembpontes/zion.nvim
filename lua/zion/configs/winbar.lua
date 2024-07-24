@@ -16,6 +16,7 @@ local exclude_filetypes = {
 	"toggleterm",
 	"qf",
 	"dapui_hover",
+	"TelescopePrompt",
 }
 
 local function set_winbar_value(value)
@@ -24,7 +25,7 @@ local function set_winbar_value(value)
 	pcall(vim.api.nvim_set_option_value, "winbar", value, { scope = "local" })
 end
 
-local function should_clear()
+local function is_excluded()
 	return vim.tbl_contains(exclude_filetypes, vim.bo.filetype)
 end
 
@@ -45,8 +46,8 @@ local function get_navic_output()
 end
 
 local function update_winbar()
-	if should_clear() then
-		set_winbar_value("[no data]")
+	if is_excluded() then
+		--set_winbar_value("[no data]")
 		return
 	end
 

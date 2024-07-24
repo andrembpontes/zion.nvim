@@ -3,13 +3,10 @@ return {
 		"nvim-telescope/telescope.nvim",
 		dependencies = {
 			{ "nvim-lua/plenary.nvim" },
-
-			-- extensions
-			"barrett-ruth/telescope-http.nvim",
 		},
 		opts = function()
 			local config = require("telescope.config")
-			local trouble = require("trouble.providers.telescope")
+			local trouble = require("trouble.sources.telescope")
 
 			-- Clone the default Telescope configuration
 			local vimgrep_arguments = { unpack(config.values.vimgrep_arguments) }
@@ -26,8 +23,13 @@ return {
 					vimgrep_arguments = vimgrep_arguments,
 
 					mappings = {
-						i = { ["<c-t>"] = trouble.open_with_trouble },
-						n = { ["<c-t>"] = trouble.open_with_trouble },
+						i = {
+							["<c-t>"] = trouble.open,
+						},
+						n = {
+							["<c-t>"] = trouble.open,
+							["q"] = "close",
+						},
 					},
 				},
 
@@ -71,7 +73,6 @@ return {
 			-- load extension
 			telescope.load_extension("projects")
 			telescope.load_extension("notify")
-			telescope.load_extension("http")
 			telescope.load_extension("lazygit")
 		end,
 	},
