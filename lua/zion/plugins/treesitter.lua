@@ -4,8 +4,8 @@ return {
         event = { "BufReadPost", "BufNewFile" },
         build = ":TSUpdate",
         dependencies = {
-            { "JoosepAlviste/nvim-ts-context-commentstring" },
-            { "nvim-treesitter/nvim-treesitter-context",    config = true },
+            -- { "JoosepAlviste/nvim-ts-context-commentstring" },
+            { "nvim-treesitter/nvim-treesitter-context", config = true },
             {
                 "SmiteshP/nvim-gps",
                 opts = {
