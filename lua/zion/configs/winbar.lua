@@ -54,8 +54,8 @@ local function update_winbar()
 	set_winbar_value("  " .. (get_navic_output() or ""))
 end
 
-vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-	callback = function()
-		pcall(update_winbar)
-	end,
-})
+-- vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+-- 	callback = function()
+-- 		pcall(update_winbar)
+-- 	end,
+-- })
