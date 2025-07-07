@@ -17,20 +17,13 @@ local function formatBuffer(bufnr)
         return
     end
 
-    local ft = vim.bo[bufnr].filetype
-    local have_null_ls = #require("null-ls.sources").get_available(ft, "NULL_LS_FORMATTING") > 0
-
     vim.lsp.buf.format(vim.tbl_deep_extend("force", {
         bufnr = bufnr,
 
         -- filter clients to be used
         -- TODO: review precedence
         filter = function(client)
-            if have_null_ls then
-                return client.name == "null-ls"
-            else
-                return client.name ~= "null-ls" and client.supports_method("textDocument/formatting")
-            end
+            return client.supports_method("textDocument/formatting")
         end,
     }, require("zion.utils.plugins").get_opts("nvim-lspconfig").format or {}))
 end

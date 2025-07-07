@@ -17,6 +17,8 @@ local exclude_filetypes = {
 	"qf",
 	"dapui_hover",
 	"TelescopePrompt",
+    "neo-tree",
+    "neo-tree-popup",
 }
 
 local function set_winbar_value(value)

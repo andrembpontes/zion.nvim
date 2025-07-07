@@ -2,6 +2,7 @@ return {
 	{
 		"SmiteshP/nvim-navbuddy",
 		cmd = "Navbuddy",
+        event = {"LspAttach"},
 		dependencies = {
 			"MunifTanjim/nui.nvim",
 		},

@@ -96,7 +96,7 @@ return {
                     base_lspconfig = {}
                 end
 
-                local fallback_opts = eval_server_opts(opts.servers["*"], name, lspconfig, base_lspconfig)
+                local fallback_opts = eval_server_opts(opts.servers["*"], name, base_lspconfig)
                 local specific_opts = eval_server_opts(opts.servers[name], name, fallback_opts)
                 server_opts_cache[name] = vim.tbl_deep_extend('force', fallback_opts, specific_opts)
 
@@ -132,8 +132,11 @@ return {
                 if key ~= "*" and server_opts then
                     -- run manual setup if mason=false or if this is a server that cannot be installed with mason-lspconfig
                     local install_fn = opts.install[key] or opts.install["*"]
+                    local ok, install_fn_res = pcall(install_fn, key, server_opts)
 
-                    if install_fn(key, server_opts) and vim.tbl_contains(available_servers, key) then
+                    local server_name = type(install_fn_res) == 'string' and install_fn_res or key
+
+                    if install_fn_res and vim.tbl_contains(available_servers, server_name) then
                         -- add into to_install
                         -- setup is called by mason setup_handlers
                         to_install[#to_install + 1] = key
@@ -147,26 +150,6 @@ return {
 
             mason_lspconfig.setup({ ensure_installed = to_install })
             mason_lspconfig.setup_handlers({ setup_server })
-        end,
-    },
-
-    {
-        "jose-elias-alvarez/null-ls.nvim",
-        event = { "BufReadPre", "BufNewFile" },
-        opts = function()
-            local nls = require("null-ls")
-            return {
-                root_dir = require("null-ls.utils").root_pattern(".null-ls-root", ".neoconf.json", "Makefile", ".git"),
-
-                sources = {
-                    nls.builtins.formatting.fish_indent,
-                    nls.builtins.diagnostics.fish,
-                    nls.builtins.formatting.stylua,
-                    nls.builtins.formatting.shfmt,
-                    -- nls.builtins.diagnostics.flake8,
-                    -- nls.builtins.diagnostics.eslint_d,
-                },
-            }
         end,
     },
 

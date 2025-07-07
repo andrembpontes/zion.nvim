@@ -6,7 +6,7 @@ return {
     -- Navbar symbols
     {
         "SmiteshP/nvim-navic",
-        lazy = true,
+        event = { "LspAttach" },
 
         init = function()
             vim.api.nvim_create_autocmd("LspAttach", {
@@ -63,6 +63,8 @@ return {
     {
         "folke/trouble.nvim",
         event = "LspAttach", -- Not required before LSP is attached
+        cmd = "Trouble",
+        opts = {},
         dependencies = { "nvim-tree/nvim-web-devicons" },
     },
 

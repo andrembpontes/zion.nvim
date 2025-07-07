@@ -192,10 +192,12 @@ return {
             -- If a file is too large, disable cmp
             vim.api.nvim_create_autocmd("BufReadPre", {
                 callback = function(t)
-                    local max_filesize = 512 * 1024 -- 512 KB
-                    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(t.buf))
+                    local max_filesize = 64 * 1024 -- 256 KB
+                    local fname = vim.api.nvim_buf_get_name(t.buf);
+                    local ok, stats = pcall(vim.loop.fs_stat, fname)
                     if ok and stats and stats.size > max_filesize then
                         cmp.setup.buffer({ enabled = false })
+                        print("[AutoComplete] Disabled for " .. fname)
                     end
                 end,
             })
