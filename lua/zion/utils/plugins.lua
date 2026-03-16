@@ -15,4 +15,9 @@ function M.has(plugin)
     return require("lazy.core.config").plugins[plugin] ~= nil
 end
 
+---@param plugin string
+function M.get_plugin_root_dir(plugin)
+    return vim.fn.stdpath("data") .. "/lazy/" .. plugin
+end
+
 return M

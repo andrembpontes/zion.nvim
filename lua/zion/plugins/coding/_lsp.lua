@@ -1,3 +1,6 @@
+
+if true then return {} end
+
 local utils_lsp = require('zion.utils.lsp')
 
 return {
@@ -24,19 +27,18 @@ return {
                     local capabilities =
                         require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
 
-                    function build_root_dir(root_markers)
+                    function build_root_dir(finder)
                         return function(fname)
                             local root =
                             -- .lsp_root takes precedence over everything else
                                 util.root_pattern(".lsp_root")(fname)
 
-                                -- then we use the root_markers
-                                or root_markers and util.root_pattern(root_markers)
+                                -- then we ask the finder, if exists
+                                or finder and finder(fname)
 
                                 -- otherwise we look for safe common defaults
                                 or util.root_pattern(".git")(fname)
-                                or vim.loop.cwd()
-                                -- or vim.loop.os_homedir()
+                                or vim.loop.os_homedir()
 
                             if not root then
                                 print('[LSP] root_dir not found for: ' .. fname)
@@ -46,21 +48,10 @@ return {
                         end
                     end
 
-                    -- if true then return {} end
-
                     return {
                         capabilities = vim.deepcopy(capabilities),
                         build_root_dir = build_root_dir,
-                        root_dir = function (bufnr, on_dir)
-                            local root_finder = build_root_dir(root_markers)
-                            local fname = vim.fn.bufname(bufnr)
-                            local root = build_root_dir(fname)
-
-                            if root then
-                                on_dir(root)
-                            end
-                        end,
-
+                        root_dir = build_root_dir(opts.root_dir),
                     }
                 end,
             },
@@ -140,16 +131,13 @@ return {
                 local config = vim.tbl_deep_extend(
                     'force', default_config, server_opts)
 
-                -- print('====' .. name .. "====")
-                -- print(vim.inspect(default_config))
-                -- print(vim.inspect(server_opts))
-                -- print(vim.inspect(config))
+                print('====' .. name .. "====")
+                print(vim.inspect(default_config))
+                print(vim.inspect(server_opts))
+                print(vim.inspect(config))
 
-                --vim.lsp.config[name] = config
+                vim.lsp.config[name] = config
                 --vim.lsp.config(name, server_opts)
-                
-                vim.lsp.config[name] = default_config
-                vim.lsp.config(name, server_opts)
 
                 vim.lsp.enable(name)
             end

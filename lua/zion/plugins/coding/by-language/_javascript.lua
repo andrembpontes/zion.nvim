@@ -1,3 +1,5 @@
+if true then return {} end
+
 return {
     {
         "neovim/nvim-lspconfig",
@@ -61,6 +63,10 @@ return {
                             },
                         },
                     },
+
+                    on_attach = function(client, bufnr)
+                        require("workspace-diagnostics").populate_workspace_diagnostics(client, bufnr)
+                    end,
                 },
                 ["eslint"] = {
                     on_attach = function(_, bufnr)
