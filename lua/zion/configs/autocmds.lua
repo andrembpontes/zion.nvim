@@ -27,6 +27,15 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
+-- set filetype for terraform files
+vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
+    group = augroup("terraform_filetype"),
+    pattern = { "*.tf", "*.tfvars" },
+    callback = function()
+        vim.bo.filetype = "terraform"
+    end,
+})
+
 -- wrap and check for spell in text filetypes
 vim.api.nvim_create_autocmd("FileType", {
     group = augroup("wrap_spell"),

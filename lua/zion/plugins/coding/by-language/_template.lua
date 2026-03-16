@@ -4,34 +4,24 @@ if true then
 	return {}
 end
 
-return {
-	{
-		"neovim/nvim-lspconfig",
-		opts = {
-			servers = {
-				["server_name"] = {
+-- To configure an LSP server, create a file at:
+--   lsp/<server_name>.lua
+--
+-- The file should return a plain table with server options:
+--
+--   return {
+--       filetypes = { "foo", "bar" },
+--       root_markers = { "foo.config", ".git" },
+--       settings = {
+--           -- server-specific settings
+--       },
+--       on_attach = function(client, bufnr)
+--           -- per-buffer setup
+--       end,
+--   }
+--
+-- Neovim 0.11+ auto-loads lsp/<name>.lua from the runtimepath.
+-- Then ensure the server is listed in mason-lspconfig's ensure_installed
+-- in lua/zion/plugins/coding/lsp.lua.
 
-					-- setup = function(name, opts) end,
-
-					-- generate LS settings
-					opts = {
-						-- custom options
-					},
-				},
-			},
-
-			--install =  {
-			-- optional, default true
-			-- return true to auto install (i.e. using mason)
-			--["server_name"] = function(name, opts) end
-			--}
-
-			--setup =  {
-			-- optional, default true
-			-- setup the LS
-			-- return true to auto setup (i.e. using lsp-config)
-			--["server_name"] = function(name, opts) end
-			--}
-		},
-	},
-}
+return {}
