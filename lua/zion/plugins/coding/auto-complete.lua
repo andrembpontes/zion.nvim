@@ -36,17 +36,24 @@ return {
                 },
 
                 formatting = {
-                    format = lspkind.cmp_format({
-                        mode = "symbol_text",
-                        menu = {
-                            buffer = "[Buff]",
-                            nvim_lsp = "[LSP]",
-                            treesitter = "[Tree]",
-                            luasnip = "[LSnip]",
-                            nvim_lua = "[Lua]",
-                            latex_symbols = "[LaTeX]",
-                        },
-                    }),
+                    format = function(entry, vim_item)
+                        -- lspkind no longer sets vim_item.kind in cmp_format (removed in 09c4e4d)
+                        -- manually prepend the icon to restore symbol+text behavior
+                        local symbol = lspkind.symbolic(vim_item.kind)
+                        if symbol ~= "" then
+                            vim_item.kind = symbol .. " " .. vim_item.kind
+                        end
+                        return lspkind.cmp_format({
+                            menu = {
+                                buffer = "[Buff]",
+                                nvim_lsp = "[LSP]",
+                                treesitter = "[Tree]",
+                                luasnip = "[LSnip]",
+                                nvim_lua = "[Lua]",
+                                latex_symbols = "[LaTeX]",
+                            },
+                        })(entry, vim_item)
+                    end,
                 },
 
                 view = {
