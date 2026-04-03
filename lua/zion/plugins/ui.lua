@@ -165,13 +165,26 @@ return {
 
     -- auto jump plugin
     {
-        "ggandor/leap.nvim",
+        url = "https://codeberg.org/andyg/leap.nvim",
         enabled = true,
         config = function()
             local leap = require("leap")
 
             leap.setup({})
-            leap.add_default_mappings()
+
+            local function set_if_unmapped(modes, lhs, rhs, desc)
+                for _, mode in ipairs(modes) do
+                    if vim.fn.mapcheck(lhs, mode) == "" and vim.fn.hasmapto(rhs, mode) == 0 then
+                        vim.keymap.set(mode, lhs, rhs, { silent = true, desc = desc })
+                    end
+                end
+            end
+
+            set_if_unmapped({ "n", "x", "o" }, "s", "<Plug>(leap-forward)", "Leap forward")
+            set_if_unmapped({ "n", "x", "o" }, "S", "<Plug>(leap-backward)", "Leap backward")
+            set_if_unmapped({ "n", "x", "o" }, "gs", "<Plug>(leap-from-window)", "Leap from window")
+            set_if_unmapped({ "x", "o" }, "x", "<Plug>(leap-forward-till)", "Leap forward till")
+            set_if_unmapped({ "x", "o" }, "X", "<Plug>(leap-backward-till)", "Leap backward till")
 
             -- Searching in all windows (including the current one) on the tab page:
             function LeapAllWindows()

@@ -15,11 +15,13 @@ return {
             },
 
             to_do = {
-                symbols = { ' ', '-', 'X' },
-                update_parents = true,
-                not_started = ' ',
-                in_progress = ' ',
-                complete = 'X'
+                statuses = {
+                    not_started = { marker = ' ' },
+                    in_progress = { marker = '-' },
+                    complete = { marker = { 'X', 'x' } },
+                },
+                status_order = { 'not_started', 'in_progress', 'complete' },
+                status_propagation = { up = true, down = true },
             },
 
         },

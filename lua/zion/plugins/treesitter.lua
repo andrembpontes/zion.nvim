@@ -24,7 +24,13 @@ return {
             },
         },
         config = function(_, opts)
-            require("nvim-treesitter.configs").setup(opts)
+            local ok, mod = pcall(require, "nvim-treesitter.config")
+            if not ok then
+                ok, mod = pcall(require, "nvim-treesitter.configs")
+            end
+            if ok and mod and type(mod.setup) == "function" then
+                mod.setup(opts)
+            end
         end,
     },
 }

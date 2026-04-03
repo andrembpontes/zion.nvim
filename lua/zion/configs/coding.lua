@@ -13,13 +13,16 @@ local dap_icons = {
     LogPoint = ".>",
 }
 
-for name, icon in pairs(diagnostics_icons) do
-    name = "DiagnosticSign" .. name
-    vim.fn.sign_define(name, { text = icon, texthl = name, numhl = "" })
-end
-
 vim.diagnostic.config({
     -- more info: https://neovim.io/doc/user/diagnostic.html#vim.diagnostic.config()
+    signs = {
+        text = {
+            [vim.diagnostic.severity.ERROR] = diagnostics_icons.Error,
+            [vim.diagnostic.severity.WARN] = diagnostics_icons.Warn,
+            [vim.diagnostic.severity.HINT] = diagnostics_icons.Hint,
+            [vim.diagnostic.severity.INFO] = diagnostics_icons.Info,
+        },
+    },
     underline = true, --underlines diagnostic messages
     update_in_insert = false,
     virtual_text = { spacing = 4, prefix = "●" },
