@@ -101,6 +101,9 @@ return {
         },
         commit = "9929e1090dd84a60c1d1cc0220e0e35473c99b5e",
         enabled = true,
+        build = function()
+            vim.cmd("UpdateRemotePlugins")
+        end,
         config = function()
             local wilder = require("wilder")
 
