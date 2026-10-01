@@ -1,36 +1,61 @@
 return {
     {
         "nvim-treesitter/nvim-treesitter",
-        event = { "BufReadPost", "BufNewFile" },
+        lazy = false, -- upstream: this plugin does not support lazy-loading
         build = ":TSUpdate",
         dependencies = {
-            -- { "JoosepAlviste/nvim-ts-context-commentstring" },
             { "nvim-treesitter/nvim-treesitter-context", config = true },
         },
         opts = {
-            ensure_installed = "all", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
-            ignore_install = {
-                "phpdoc",
-            },
+            -- tiers ("stable", "unstable", "unmaintained") and/or explicit languages,
+            -- auto-installed on startup; "stable" alone is only a handful of parsers
+            parsers = { "stable", "unstable" },
 
-            highlight = { enable = true },
-            indent = { enable = true },
-            context_commentstring = {
-                enable = true,
-                enable_autocmd = false,
-            },
-            matchup = {
-                enable = true,
-            },
+            -- tree-sitter-cli is managed through mason: Debian's package is older
+            -- than the minimum nvim-treesitter requires
+            cli = { auto_update = true },
+
+            -- highlighting/indentation are Neovim core features since 0.12,
+            -- nvim-treesitter only ships the queries now
+            highlight = true,
+            indent = true,
         },
         config = function(_, opts)
-            local ok, mod = pcall(require, "nvim-treesitter.config")
-            if not ok then
-                ok, mod = pcall(require, "nvim-treesitter.configs")
+            local ts = require("nvim-treesitter")
+
+            -- parsers/queries are installed into stdpath("data") .. "/site"
+            -- (prepended to runtimepath, so it wins over plugin dirs)
+            ts.setup({ install_dir = opts.install_dir })
+
+            -- parser installs shell out to tree-sitter-cli, so make sure it exists first
+            -- (no-op for parsers that are already installed)
+            require("zion.utils.treesitter_cli").ensure(opts.cli, function(ok)
+                if ok then
+                    ts.install(opts.parsers)
+                end
+            end)
+
+            if not (opts.highlight or opts.indent) then
+                return
             end
-            if ok and mod and type(mod.setup) == "function" then
-                mod.setup(opts)
-            end
+
+            -- core only starts treesitter for the filetypes it ships parsers for
+            vim.api.nvim_create_autocmd("FileType", {
+                group = vim.api.nvim_create_augroup("ZionTreesitter", { clear = true }),
+                callback = function()
+                    local buf = vim.api.nvim_get_current_buf()
+                    local ok, parser = pcall(vim.treesitter.get_parser, buf)
+                    if not (ok and parser) then
+                        return -- no parser installed for this filetype
+                    end
+                    if opts.highlight and not vim.treesitter.highlighter.active[buf] then
+                        pcall(vim.treesitter.start, buf)
+                    end
+                    if opts.indent then
+                        vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                    end
+                end,
+            })
         end,
     },
 }
